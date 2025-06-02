@@ -235,6 +235,80 @@
             50% { background-color: var(--accent-secondary); }
             100% { background-color: var(--accent-primary); }
         }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .copy-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: calc(var(--border-radius) / 2);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            opacity: 0.8;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+            background-color: var(--accent-secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background-color: var(--success-color);
+            animation: copy-success 0.3s ease;
+        }
+
+        @keyframes copy-success {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .copy-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 2.5;
+        }
+
+        /* Toast notification for copy feedback */
+        .copy-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 3000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .copy-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
     </style>
 </head>
 <body>
@@ -310,19 +384,55 @@
 
             <div class="transcript-column-wrapper output-column">
                 <section class="card">
-                    <h2 class="card-title">Conversation (Plain Text)</h2>
+                    <div class="output-header">
+                        <h2 class="card-title">Conversation (Plain Text)</h2>
+                        <button class="copy-btn" data-target="transcriptOutputConvo" title="Copy to clipboard">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="m5 15-4-4 4-4"></path>
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
                     <textarea id="transcriptOutputConvo" class="output-area" placeholder="Full conversation text will appear here..." readonly></textarea>
                 </section>
                 <section class="card">
-                    <h2 class="card-title">Polished Note</h2>
+                    <div class="output-header">
+                        <h2 class="card-title">Polished Note</h2>
+                        <button class="copy-btn" data-target="transcriptOutputPolished" title="Copy to clipboard">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="m5 15-4-4 4-4"></path>
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
                     <textarea id="transcriptOutputPolished" class="output-area" placeholder="Polished and formatted note will appear here..." readonly></textarea>
                 </section>
                 <section class="card">
-                    <h2 class="card-title">Multispeaker Output</h2>
+                    <div class="output-header">
+                        <h2 class="card-title">Multispeaker Output</h2>
+                        <button class="copy-btn" data-target="transcriptOutputMultispeaker" title="Copy to clipboard">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="m5 15-4-4 4-4"></path>
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
                     <textarea id="transcriptOutputMultispeaker" class="output-area" placeholder="Speaker-labeled segments will appear here..." readonly></textarea>
                 </section>
                 <section class="card">
-                    <h2 class="card-title">Detected Topics</h2>
+                    <div class="output-header">
+                        <h2 class="card-title">Detected Topics</h2>
+                        <button class="copy-btn" data-target="detectedTopicsList" data-type="list" title="Copy topics to clipboard">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="m5 15-4-4 4-4"></path>
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
                     <ul id="detectedTopicsList" class="empty">
                         <li>No topics detected yet.</li>
                     </ul>

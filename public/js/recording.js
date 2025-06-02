@@ -135,4 +135,133 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize
   loadRecording()
+
+  // Copy to clipboard functionality
+  function copyToClipboard(text, buttonElement) {
+    if (!text || text.trim() === "") {
+      showCopyToast("Nothing to copy", "error")
+      return
+    }
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          showCopySuccess(buttonElement)
+          showCopyToast("Copied to clipboard!")
+        })
+        .catch((err) => {
+          console.error("Failed to copy:", err)
+          fallbackCopyTextToClipboard(text, buttonElement)
+        })
+    } else {
+      fallbackCopyTextToClipboard(text, buttonElement)
+    }
+  }
+
+  function fallbackCopyTextToClipboard(text, buttonElement) {
+    const textArea = document.createElement("textarea")
+    textArea.value = text
+    textArea.style.position = "fixed"
+    textArea.style.left = "-999999px"
+    textArea.style.top = "-999999px"
+    document.body.appendChild(textArea)
+    textArea.focus()
+    textArea.select()
+
+    try {
+      const successful = document.execCommand("copy")
+      if (successful) {
+        showCopySuccess(buttonElement)
+        showCopyToast("Copied to clipboard!")
+      } else {
+        showCopyToast("Copy failed", "error")
+      }
+    } catch (err) {
+      console.error("Fallback copy failed:", err)
+      showCopyToast("Copy not supported", "error")
+    }
+
+    document.body.removeChild(textArea)
+  }
+
+  function showCopySuccess(buttonElement) {
+    const originalText = buttonElement.innerHTML
+    buttonElement.classList.add("copied")
+    buttonElement.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20,6 9,17 4,12"></polyline>
+      </svg>
+      Copied!
+    `
+
+    setTimeout(() => {
+      buttonElement.classList.remove("copied")
+      buttonElement.innerHTML = originalText
+    }, 2000)
+  }
+
+  function showCopyToast(message, type = "success") {
+    const existingToast = document.querySelector(".copy-toast")
+    if (existingToast) {
+      existingToast.remove()
+    }
+
+    const toast = document.createElement("div")
+    toast.className = "copy-toast"
+    toast.textContent = message
+
+    if (type === "error") {
+      toast.style.backgroundColor = "var(--error-color)"
+    }
+
+    document.body.appendChild(toast)
+
+    setTimeout(() => {
+      toast.classList.add("show")
+    }, 10)
+
+    setTimeout(() => {
+      toast.classList.remove("show")
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast)
+        }
+      }, 300)
+    }, 3000)
+  }
+
+  // Add event listeners for copy buttons
+  document.addEventListener("click", (event) => {
+    if (event.target.closest(".copy-btn")) {
+      const button = event.target.closest(".copy-btn")
+      const targetId = button.getAttribute("data-target")
+      const dataType = button.getAttribute("data-type")
+      const targetElement = document.getElementById(targetId)
+
+      if (!targetElement) {
+        showCopyToast("Target element not found", "error")
+        return
+      }
+
+      let textToCopy = ""
+
+      if (dataType === "list") {
+        const listItems = targetElement.querySelectorAll("li")
+        if (listItems.length === 0 || (listItems.length === 1 && listItems[0].textContent.includes("No topics"))) {
+          showCopyToast("No topics to copy", "error")
+          return
+        }
+
+        textToCopy = Array.from(listItems)
+          .map((li) => li.textContent.trim())
+          .filter((text) => text && !text.includes("No topics"))
+          .join("\n")
+      } else {
+        textToCopy = targetElement.textContent || targetElement.value || ""
+      }
+
+      copyToClipboard(textToCopy, button)
+    }
+  })
 })
