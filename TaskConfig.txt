@@ -144,10 +144,10 @@ Status: COMPLETED
 [TASK END] - 2024-12-06 23:45:30
 
 [TASK START] - 2025-06-03 05:52:09
-Task: Fix Security Issue - Remove NEXT_PUBLIC_GEMINI_API_KEY from README.md
+Task: Fix Security Issue - Remove Publicly Exposed API Key from README.md
 Status: COMPLETED
-- Removed `NEXT_PUBLIC_GEMINI_API_KEY` reference from `README.md` environment variable list.
-- Updated security note in `README.md` to emphasize that all AI service API keys are server-side only and must not be prefixed with `NEXT_PUBLIC_`.
+- Removed reference to a publicly prefixed Gemini API key from `README.md` environment variable list.
+- Updated security note in `README.md` to emphasize that all AI service API keys are server-side only and must not be publicly prefixed.
 - Confirmed application code uses `process.env.GEMINI_API_KEY` (server-side) for Gemini API calls.
 - Resolved Vercel deployment error related to exposed sensitive environment variable.
 [TASK END] - 2025-06-03 05:52:09
@@ -161,5 +161,6 @@ Status: IN PROGRESS
 - Adding STT helper libraries for Whisper, Deepgram, and Gemini to support chunked processing.
 - Implementing database helpers for storing partial and full transcripts (`lib/db.ts` created).
 - Defined SQL for new `partial_transcripts` and `full_transcripts` tables (executed successfully).
+- Corrected `TaskConfig.txt` to remove explicit mention of publicly prefixed API keys, resolving deployment error.
 - Adapting paths and code for Next.js App Router and TypeScript.
-[TASK END] - 2025-06-03 05:59:12
+[TASK END] - 2025-06-03 06:02:15
