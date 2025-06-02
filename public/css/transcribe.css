@@ -1,0 +1,180 @@
+/* Copy the CSS from transcribe.html here for shared styles */
+:root {
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+  /* Dictate Inspired Colors */
+  --dictate-dark-blue: #1e3a8a;
+  --dictate-light-blue-accent: #60a5fa;
+  --dictate-green-accent: #34d399;
+
+  /* Light Theme (Default) */
+  --bg-primary-light: #f7f9fc;
+  --bg-secondary-light: #ffffff;
+  --text-primary-light: #222f3e;
+  --text-secondary-light: #576574;
+  --accent-primary-light: var(--dictate-dark-blue);
+  --accent-secondary-light: #1c3274;
+  --border-color-light: #dde3ea;
+  --shadow-color-light: rgba(30, 58, 138, 0.08);
+  --error-color-light: #ef4444;
+  --success-color-light: #10b981;
+  --output-bg-light: #fdfefe;
+
+  /* Dark Theme */
+  --bg-primary-dark: #161a1d;
+  --bg-secondary-dark: #1f2428;
+  --text-primary-dark: #e5e7eb;
+  --text-secondary-dark: #9ca3af;
+  --accent-primary-dark: var(--dictate-light-blue-accent);
+  --accent-secondary-dark: #3b82f6;
+  --border-color-dark: #374151;
+  --shadow-color-dark: rgba(0, 0, 0, 0.2);
+  --error-color-dark: #f87171;
+  --success-color-dark: #34d399;
+  --output-bg-dark: #24292e;
+
+  /* Universal Variables */
+  --border-radius: 8px;
+  --transition-speed: 0.25s;
+  --button-padding: 0.75em 1.4em;
+}
+
+/* Initialize theme variables */
+body {
+  --bg-primary: var(--bg-primary-light);
+  --bg-secondary: var(--bg-secondary-light);
+  --text-primary: var(--text-primary-light);
+  --text-secondary: var(--text-secondary-light);
+  --accent-primary: var(--accent-primary-light);
+  --accent-secondary: var(--accent-secondary-light);
+  --border-color: var(--border-color-light);
+  --shadow-color: var(--shadow-color-light);
+  --error-color: var(--error-color-light);
+  --success-color: var(--success-color-light);
+  --output-bg: var(--output-bg-light);
+}
+
+body.dark-theme {
+  --bg-primary: var(--bg-primary-dark);
+  --bg-secondary: var(--bg-secondary-dark);
+  --text-primary: var(--text-primary-dark);
+  --text-secondary: var(--text-secondary-dark);
+  --accent-primary: var(--accent-primary-dark);
+  --accent-secondary: var(--accent-secondary-dark);
+  --border-color: var(--border-color-dark);
+  --shadow-color: var(--shadow-color-dark);
+  --error-color: var(--error-color-dark);
+  --success-color: var(--success-color-dark);
+  --output-bg: var(--output-bg-dark);
+}
+
+/* Global Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-secondary);
+  box-shadow: 0 2px 8px var(--shadow-color);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.theme-switch {
+  display: inline-block;
+  height: 26px;
+  position: relative;
+  width: 50px;
+  margin-left: 0.5rem;
+}
+
+.theme-switch input {
+  display: none;
+}
+
+.slider {
+  background-color: #b0b0b0;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: .4s;
+  border-radius: 26px;
+}
+
+.slider:before {
+  background-color: #fff;
+  bottom: 3px;
+  content: "";
+  height: 20px;
+  left: 3px;
+  position: absolute;
+  transition: .4s;
+  width: 20px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .slider {
+  background-color: var(--accent-primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+.spinner {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid var(--accent-primary);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

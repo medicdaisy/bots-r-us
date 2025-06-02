@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictate - Recording History</title>
+    <link rel="stylesheet" href="/css/transcribe.css">
+    <style>
+        .history-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .history-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .back-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--accent-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: background-color var(--transition-speed);
+        }
+        
+        .back-btn:hover {
+            background-color: var(--accent-secondary);
+        }
+        
+        .recordings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .recording-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        
+        .recording-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--shadow-color);
+        }
+        
+        .recording-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        
+        .recording-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .recording-date {
+            font-weight: 500;
+        }
+        
+        .medical-badge {
+            background-color: var(--dictate-green-accent);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .recording-preview {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            max-height: 3rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .recording-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+        
+        .btn-view {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background-color: var(--accent-secondary);
+        }
+        
+        .btn-play {
+            background-color: var(--dictate-green-accent);
+            color: white;
+        }
+        
+        .btn-play:hover {
+            background-color: #25a575;
+        }
+        
+        .btn-delete {
+            background-color: var(--error-color);
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc2626;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .loading-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .search-bar {
+            margin-bottom: 2rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px var(--accent-primary);
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo-text">Dictate</div>
+        <div class="theme-switch-wrapper">
+            <label for="themeToggleCheckbox" style="color: var(--text-secondary); font-size: 0.8rem; margin-right: 0.5rem;">Dark Mode</label>
+            <label class="theme-switch" for="themeToggleCheckbox">
+                <input type="checkbox" id="themeToggleCheckbox" />
+                <div class="slider"></div>
+            </label>
+        </div>
+    </header>
+
+    <div class="history-container">
+        <div class="history-header">
+            <h1 class="history-title">Recording History</h1>
+            <a href="/transcribe.html" class="back-btn">← Back to Transcribe</a>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search recordings...">
+        </div>
+        
+        <div id="loadingState" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading recordings...</p>
+        </div>
+        
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <h3>No recordings found</h3>
+            <p>Start by creating your first recording on the transcribe page.</p>
+        </div>
+        
+        <div id="recordingsGrid" class="recordings-grid" style="display: none;">
+            <!-- Recordings will be populated here -->
+        </div>
+    </div>
+
+    <script src="/js/history.js"></script>
+</body>
+</html>

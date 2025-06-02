@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finla.ai - Advanced Transcription UI</title>
+    <style>
+        /* CSS Variables for Theming and Consistency */
+        :root {
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            
+            /* Finla.ai Inspired Colors */
+            --finla-dark-blue: #1E3A8A; 
+            --finla-light-blue-accent: #60A5FA;
+            --finla-green-accent: #34D399;
+
+            /* Light Theme (Default) */
+            --bg-primary-light: #F7F9FC;
+            --bg-secondary-light: #FFFFFF;
+            --text-primary-light: #222F3E;
+            --text-secondary-light: #576574;
+            --accent-primary-light: var(--finla-dark-blue);
+            --accent-secondary-light: #1C3274;
+            --border-color-light: #DDE3EA;
+            --shadow-color-light: rgba(30, 58, 138, 0.08);
+            --error-color-light: #EF4444;
+            --success-color-light: #10B981;
+            --output-bg-light: #FDFEFE;
+
+            /* Dark Theme */
+            --bg-primary-dark: #161A1D;
+            --bg-secondary-dark: #1F2428;
+            --text-primary-dark: #E5E7EB;
+            --text-secondary-dark: #9CA3AF;
+            --accent-primary-dark: var(--finla-light-blue-accent);
+            --accent-secondary-dark: #3B82F6;
+            --border-color-dark: #374151;
+            --shadow-color-dark: rgba(0, 0, 0, 0.2);
+            --error-color-dark: #F87171;
+            --success-color-dark: #34D399;
+            --output-bg-dark: #24292E;
+
+            /* Universal Variables */
+            --border-radius: 8px;
+            --transition-speed: 0.25s;
+            --button-padding: 0.75em 1.4em;
+        }
+
+        /* Initialize theme variables */
+        body {
+            --bg-primary: var(--bg-primary-light);
+            --bg-secondary: var(--bg-secondary-light);
+            --text-primary: var(--text-primary-light);
+            --text-secondary: var(--text-secondary-light);
+            --accent-primary: var(--accent-primary-light);
+            --accent-secondary: var(--accent-secondary-light);
+            --border-color: var(--border-color-light);
+            --shadow-color: var(--shadow-color-light);
+            --error-color: var(--error-color-light);
+            --success-color: var(--success-color-light);
+            --output-bg: var(--output-bg-light);
+        }
+
+        body.dark-theme {
+            --bg-primary: var(--bg-primary-dark);
+            --bg-secondary: var(--bg-secondary-dark);
+            --text-primary: var(--text-primary-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --accent-primary: var(--accent-primary-dark);
+            --accent-secondary: var(--accent-secondary-dark);
+            --border-color: var(--border-color-dark);
+            --shadow-color: var(--shadow-color-dark);
+            --error-color: var(--error-color-dark);
+            --success-color: var(--success-color-dark);
+            --output-bg: var(--output-bg-dark);
+        }
+
+        /* Global Styles */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-family); background-color: var(--bg-primary); color: var(--text-primary);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+            font-size: 16px; line-height: 1.6;
+        }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 1rem; }
+
+        /* Header */
+        .app-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem;
+            background-color: var(--bg-secondary); box-shadow: 0 2px 8px var(--shadow-color);
+            border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;
+            transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+        }
+        .logo-text { font-size: 1.5rem; font-weight: 700; color: var(--accent-primary); }
+        .theme-switch-wrapper { display: flex; align-items: center; }
+        .theme-switch { display: inline-block; height: 26px; position: relative; width: 50px; margin-left: 0.5rem; }
+        .theme-switch input { display:none; }
+        .slider {
+            background-color: #B0B0B0; bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0;
+            transition: .4s; border-radius: 26px;
+        }
+        .slider:before {
+            background-color: #fff; bottom: 3px; content: ""; height: 20px; left: 3px; position: absolute;
+            transition: .4s; width: 20px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider { background-color: var(--accent-primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        
+        .main-content { padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .card {
+            background-color: var(--bg-secondary); border-radius: var(--border-radius); padding: 1.5rem;
+            box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color);
+            transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+        .controls-area .control-group { margin-bottom: 1rem; }
+        .controls-area label { display: block; font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.4rem; }
+        .controls-area select, .status-display-text { 
+            width: 100%; padding: 0.65rem 0.75rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);
+            background-color: var(--bg-primary); color: var(--text-primary); font-size: 0.9rem;
+            transition: border-color var(--transition-speed) ease, background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+        .controls-area select:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 2px var(--accent-primary); }
+        
+        .topic-focus-group { margin-top: 1rem; }
+        .topic-focus-group .card-title { margin-bottom: 0.5rem; font-size:1rem; }
+        .topic-focus-group .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .topic-focus-group .checkbox-item { display: flex; align-items: center; }
+        .topic-focus-group .checkbox-item input[type="checkbox"] { margin-right: 0.5rem; width: 16px; height: 16px; accent-color: var(--accent-primary); }
+        .topic-focus-group .checkbox-item label { font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0; }
+
+        .status-display-container { opacity: 1; transform: translateY(0); transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease; }
+        .status-display-container.hidden { opacity: 0; transform: translateY(-10px); height: 0; overflow: hidden; }
+        .status-display-text {
+             min-height: 38px; display: flex; align-items: center; font-style: italic; margin-bottom: 0.5rem;
+        }
+        .status-display-text.error { color: var(--error-color); font-weight: 500; border-left: 3px solid var(--error-color); padding-left: 0.5rem;}
+        .status-display-text.success { color: var(--success-color); font-weight: 500; border-left: 3px solid var(--success-color); padding-left: 0.5rem;}
+        
+        #audioWaveformCanvas {
+            width: 100%; height: 60px; background-color: var(--output-bg);
+            border-radius: calc(var(--border-radius) / 2); display: none; margin-top: 0.5rem; border: 1px solid var(--border-color);
+        }
+        
+        .button-group { display: flex; flex-direction: column; gap: 0.75rem; }
+        .button-row { display: flex; gap: 0.5rem; } 
+        .button-row .btn { flex: 1; } 
+
+        .btn {
+            padding: var(--button-padding); font-size: 0.95rem; font-weight: 500; border: none;
+            border-radius: var(--border-radius); cursor: pointer;
+            transition: background-color var(--transition-speed) ease, transform 0.1s ease, box-shadow var(--transition-speed) ease;
+            text-align: center; width: 100%;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        .btn-primary { background-color: var(--accent-primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background-color: var(--accent-secondary); box-shadow: 0 4px 8px var(--shadow-color); }
+        .btn-secondary { background-color: var(--bg-secondary); color: var(--accent-primary); border: 1.5px solid var(--accent-primary); }
+        .btn-secondary:hover:not(:disabled) { background-color: var(--accent-primary); color: white; box-shadow: 0 4px 8px var(--shadow-color); }
+        .btn-warning { background-color: #F59E0B; color: white; } 
+        .btn-warning:hover:not(:disabled) { background-color: #D97706; } 
+        .btn:active:not(:disabled) { transform: scale(0.98); box-shadow: 0 1px 2px var(--shadow-color); }
+        .btn.disabled, .btn:disabled {
+            background-color: var(--text-secondary) !important; color: var(--bg-secondary) !important;
+            cursor: not-allowed !important; opacity: 0.5 !important; border-color: var(--text-secondary) !important;
+            box-shadow: none !important;
+        }
+        
+        .upload-group { margin-top: 0.75rem; }
+        #audioFileUpload { display: none; }
+        .btn-upload { background-color: var(--finla-green-accent); color: white; }
+        .btn-upload:hover:not(:disabled) { background-color: #25a575; box-shadow: 0 4px 8px var(--shadow-color);}
+        #fileNameDisplay { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.4rem; text-align: center; word-break: break-all; }
+        
+        .output-column { display: flex; flex-direction: column; gap: 1.5rem; }
+        .output-area {
+            width: 100%; min-height: 120px; padding: 0.75rem 1rem; border-radius: var(--border-radius);
+            border: 1px solid var(--border-color); background-color: var(--output-bg); color: var(--text-primary);
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.875rem; line-height: 1.6; resize: vertical;
+            transition: border-color var(--transition-speed) ease, background-color var(--transition-speed) ease;
+            white-space: pre-wrap; word-wrap: break-word;
+        }
+        .output-area:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 2px var(--accent-primary); }
+        
+        #detectedTopicsList { list-style-type: none; padding-left: 0; }
+        #detectedTopicsList li {
+            background-color: var(--bg-primary); padding: 0.5rem 0.75rem; border-radius: calc(var(--border-radius) / 2);
+            margin-bottom: 0.5rem; border: 1px solid var(--border-color); font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+         #detectedTopicsList li:last-child { margin-bottom: 0; }
+         #detectedTopicsList.empty { font-style: italic; color: var(--text-secondary); }
+         .placeholder-note { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; font-style: italic;}
+
+        @media (min-width: 768px) {
+            .container { padding: 1.5rem 2rem; }
+            .main-content { flex-direction: row; align-items: flex-start; }
+            .controls-column { flex: 0 0 320px; max-width: 320px; display: flex; flex-direction: column; gap: 1.5rem; }
+            .controls-column .card { width: 100%; }
+            .transcript-column-wrapper { flex: 1; min-width: 0; }
+        }
+        
+        .app-footer {
+            text-align: center; padding: 1.5rem 1rem; color: var(--text-secondary); font-size: 0.875rem;
+            border-top: 1px solid var(--border-color); margin-top: 2rem;
+        }
+        
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 2000; color: white; font-size: 1.2rem; text-align: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #loadingOverlay.visible { opacity: 1; visibility: visible; }
+        .spinner {
+            border: 5px solid #f3f3f3; border-top: 5px solid var(--accent-primary);
+            border-radius: 50%; width: 50px; height: 50px;
+            animation: spin 1s linear infinite; margin-bottom: 1rem;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .btn.animating {
+            animation: btn-pulse-border 1.5s infinite, btn-pulse-bg 1.5s infinite;
+        }
+        @keyframes btn-pulse-border {
+            0% { border-color: var(--accent-primary); }
+            50% { border-color: var(--accent-secondary); }
+            100% { border-color: var(--accent-primary); }
+        }
+        @keyframes btn-pulse-bg {
+            0% { background-color: var(--accent-primary); }
+            50% { background-color: var(--accent-secondary); }
+            100% { background-color: var(--accent-primary); }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <p id="loadingMessage">Processing audio...</p>
+    </div>
+
+    <header class="app-header">
+        <div class="logo-text">Finla.ai</div>
+        <div class="theme-switch-wrapper">
+            <label for="themeToggleCheckbox" style="color: var(--text-secondary); font-size: 0.8rem; margin-right: 0.5rem;">Dark Mode</label>
+            <label class="theme-switch" for="themeToggleCheckbox">
+                <input type="checkbox" id="themeToggleCheckbox" />
+                <div class="slider"></div>
+            </label>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="controls-column">
+                <section class="card controls-area">
+                    <h2 class="card-title">Transcription Controls</h2>
+                    <div class="control-group">
+                        <label for="sttServiceSelect">STT Service</label>
+                        <select id="sttServiceSelect">
+                            <option value="gemini">Google Gemini (Long Audio)</option>
+                            <option value="openai_whisper">OpenAI Whisper</option>
+                            <option value="deepgram_nova">Deepgram (Nova-3)</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button id="startRecordBtn" class="btn btn-primary">Start Recording</button>
+                        <div class="button-row">
+                            <button id="pauseRecordBtn" class="btn btn-warning disabled" disabled>Pause</button>
+                            <button id="resumeRecordBtn" class="btn btn-primary disabled" disabled>Resume</button>
+                        </div>
+                        <button id="stopRecordBtn" class="btn btn-secondary disabled" disabled>Stop & Transcribe</button>
+                        <div class="upload-group">
+                            <button id="uploadAudioBtn" class="btn btn-upload">Upload Audio File</button>
+                            <input type="file" id="audioFileUpload" accept="audio/*,video/webm,audio/webm,audio/mp3,audio/mp4,audio/mpeg,audio/mpga,audio/m4a,audio/wav,audio/ogg">
+                            <div id="fileNameDisplay">No file selected.</div>
+                        </div>
+                    </div>
+                     <div class="topic-focus-group control-group">
+                        <h3 class="card-title">Topic Focus</h3>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="topicMedical" name="topicFocus" value="medical">
+                                <label for="topicMedical">Medical</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="topicMultiSpeaker" name="topicFocus" value="multispeaker">
+                                <label for="topicMultiSpeaker">Multi-Speaker</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="topicGeneral" name="topicFocus" value="general" checked>
+                                <label for="topicGeneral">General</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card status-area">
+                    <h2 class="card-title">Status</h2>
+                    <div class="status-display-container">
+                        <div id="statusDisplayText" class="status-display-text">Idle. Ready to record or upload.</div>
+                    </div>
+                    <canvas id="audioWaveformCanvas"></canvas>
+                </section>
+            </div>
+
+            <div class="transcript-column-wrapper output-column">
+                <section class="card">
+                    <h2 class="card-title">Conversation (Plain Text)</h2>
+                    <textarea id="transcriptOutputConvo" class="output-area" placeholder="Full conversation text will appear here..." readonly></textarea>
+                </section>
+                <section class="card">
+                    <h2 class="card-title">Polished Note</h2>
+                    <textarea id="transcriptOutputPolished" class="output-area" placeholder="Polished and formatted note will appear here..." readonly></textarea>
+                </section>
+                <section class="card">
+                    <h2 class="card-title">Multispeaker Output</h2>
+                    <textarea id="transcriptOutputMultispeaker" class="output-area" placeholder="Speaker-labeled segments will appear here..." readonly></textarea>
+                </section>
+                <section class="card">
+                    <h2 class="card-title">Detected Topics</h2>
+                    <ul id="detectedTopicsList" class="empty">
+                        <li>No topics detected yet.</li>
+                    </ul>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="app-footer">
+        <p>© <span id="currentYear"></span> Finla.ai. Advanced transcription interface.</p>
+    </footer>
+
+    <script src="/js/transcribe.js"></script>
+</body>
+</html>
