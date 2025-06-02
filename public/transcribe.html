@@ -350,7 +350,7 @@
                         <button id="stopRecordBtn" class="btn btn-secondary disabled" disabled>Stop & Transcribe</button>
                         <div class="upload-group">
                             <button id="uploadAudioBtn" class="btn btn-upload">Upload Audio File</button>
-                            <input type="file" id="audioFileUpload" accept="audio/*,video/webm,audio/webm,audio/mp3,audio/mp4,audio/mpeg,audio/mpga,audio/m4a,audio/wav,audio/ogg">
+                            <input type="file" id="audioFileUpload" accept="audio/*,video/webm,video/mp4,audio/webm,audio/mp3,audio/mp4,audio/mpeg,audio/mpga,audio/m4a,audio/wav,audio/ogg,audio/aac,.mp3,.wav,.m4a,.aac,.ogg,.webm,.mp4">
                             <div id="fileNameDisplay">No file selected.</div>
                         </div>
                     </div>
@@ -379,6 +379,8 @@
                         <div id="statusDisplayText" class="status-display-text">Idle. Ready to record or upload.</div>
                     </div>
                     <canvas id="audioWaveformCanvas"></canvas>
+                    <div id="errorDetails" style="display: none; margin-top: 0.5rem; padding: 0.5rem; background-color: var(--error-color); color: white; border-radius: 4px; font-size: 0.875rem;">
+                    </div>
                 </section>
             </div>
 

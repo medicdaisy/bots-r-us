@@ -84,6 +84,18 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(`Status: ${message} (${type})`)
   }
 
+  // Add a function to show detailed error information
+  function showErrorDetails(error) {
+    const errorDetails = document.getElementById("errorDetails")
+    if (errorDetails) {
+      errorDetails.style.display = "block"
+      errorDetails.textContent = `Debug: ${error}`
+      setTimeout(() => {
+        errorDetails.style.display = "none"
+      }, 10000) // Hide after 10 seconds
+    }
+  }
+
   // UI state management
   function updateUIForRecordingState() {
     startRecordBtn.disabled = recordingState !== "idle"
@@ -246,9 +258,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // API calls
-  async function transcribeAudio(audioBlob, options = {}) {
+  async function transcribeAudio(audioData, options = {}) {
     const formData = new FormData()
-    formData.append("audio", audioBlob)
+
+    // Handle both File and Blob objects
+    if (audioData instanceof File) {
+      formData.append("audio", audioData, audioData.name)
+    } else if (audioData instanceof Blob) {
+      formData.append("audio", audioData, "recording.webm")
+    } else {
+      throw new Error("Invalid audio data type")
+    }
+
     formData.append("service", sttServiceSelect.value)
     formData.append("enableMedical", topicMedicalCheckbox.checked)
     formData.append("enableMultiSpeaker", topicMultiSpeakerCheckbox.checked)
@@ -259,10 +280,17 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     if (!response.ok) {
-      throw new Error(`Transcription failed: ${response.statusText}`)
+      const errorText = await response.text()
+      throw new Error(`Transcription failed: ${response.status} ${response.statusText} - ${errorText}`)
     }
 
-    return await response.json()
+    try {
+      return await response.json()
+    } catch (error) {
+      console.error("Transcription API error:", error)
+      showErrorDetails(error.message)
+      throw new Error(`Transcription failed: ${error.message}`)
+    }
   }
 
   async function saveRecording(audioBlob, transcriptionData) {
@@ -283,31 +311,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Handle file upload
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith("audio/")) {
-      updateStatus("Please select an audio file", "error")
+    if (!file.type.startsWith("audio/") && !file.type.startsWith("video/")) {
+      updateStatus("Please select an audio or video file", "error")
       return
     }
 
-    updateStatus("Processing uploaded audio...", "info")
-
-    const reader = new FileReader()
-    reader.onload = async (e) => {
-      try {
-        const base64data = e.target?.result
-        const base64Audio = base64data.split(",")[1]
-        const mimeType = file.type
-
-        await processAudio(file)
-      } catch (error) {
-        console.error("Error processing uploaded file:", error)
-        updateStatus("Error processing uploaded file", "error")
-      }
+    // Check file size (max 50MB)
+    const maxSize = 50 * 1024 * 1024 // 50MB
+    if (file.size > maxSize) {
+      updateStatus("File too large. Maximum size is 50MB.", "error")
+      return
     }
-    reader.readAsDataURL(file)
+
+    fileNameDisplay.textContent = `Selected: ${file.name}`
+    clearOutputFields()
+    updateStatus(`Processing "${file.name}"...`, "info")
+    showLoading("Processing file...")
+    uploadAudioBtn.textContent = "Processing..."
+    uploadAudioBtn.classList.add("animating")
+
+    try {
+      await processAudio(file)
+    } catch (error) {
+      console.error("Error processing uploaded file:", error)
+      updateStatus("Error processing uploaded file: " + error.message, "error")
+      resetToIdle()
+    }
   }
 
   // Start recording
@@ -434,7 +467,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Process audio
-  const processAudio = async (audioBlob) => {
+  const processAudio = async (audioData) => {
+    let audioBlob
+
+    // Handle both File objects and Blob objects
+    if (audioData instanceof File) {
+      audioBlob = audioData
+    } else if (audioData instanceof Blob) {
+      audioBlob = audioData
+    } else {
+      updateStatus("Invalid audio data provided", "error")
+      return
+    }
+
     if (audioBlob.size === 0) {
       updateStatus("No audio data captured. Please try again.", "error")
       return
@@ -527,14 +572,27 @@ document.addEventListener("DOMContentLoaded", () => {
   audioFileUpload.addEventListener("change", async (event) => {
     const file = event.target.files[0]
     if (file) {
-      fileNameDisplay.textContent = `Selected: ${file.name}`
+      console.log("File selected:", {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+      })
+
+      fileNameDisplay.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
       clearOutputFields()
       updateStatus(`Processing "${file.name}"...`, "info")
       showLoading("Processing file...")
       uploadAudioBtn.textContent = "Processing..."
       uploadAudioBtn.classList.add("animating")
 
-      await processAudio(file)
+      try {
+        await processAudio(file)
+      } catch (error) {
+        console.error("File processing error:", error)
+        updateStatus(`Error processing file: ${error.message}`, "error")
+        resetToIdle()
+      }
     } else {
       fileNameDisplay.textContent = "No file selected."
       uploadAudioBtn.textContent = "Upload Audio File"

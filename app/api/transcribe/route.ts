@@ -11,14 +11,48 @@ export async function POST(request: NextRequest) {
     const enableMedical = formData.get("enableMedical") === "true"
     const enableMultiSpeaker = formData.get("enableMultiSpeaker") === "true"
 
+    console.log("Received transcription request:", {
+      fileName: audioFile?.name,
+      fileSize: audioFile?.size,
+      fileType: audioFile?.type,
+      service,
+      enableMedical,
+      enableMultiSpeaker,
+    })
+
     if (!audioFile) {
       return NextResponse.json({ success: false, error: "No audio file provided" }, { status: 400 })
     }
 
-    // Convert file to base64
-    const bytes = await audioFile.arrayBuffer()
-    const base64Audio = Buffer.from(bytes).toString("base64")
-    const mimeType = audioFile.type
+    // Validate file size (max 50MB)
+    const maxSize = 50 * 1024 * 1024 // 50MB
+    if (audioFile.size > maxSize) {
+      return NextResponse.json({ success: false, error: "File too large. Maximum size is 50MB." }, { status: 400 })
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      "audio/webm",
+      "audio/mp4",
+      "audio/mpeg",
+      "audio/mp3",
+      "audio/wav",
+      "audio/ogg",
+      "audio/m4a",
+      "audio/aac",
+      "video/webm",
+      "video/mp4",
+    ]
+
+    if (!allowedTypes.includes(audioFile.type) && !audioFile.name.match(/\.(mp3|wav|m4a|aac|ogg|webm|mp4)$/i)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unsupported file type. Please use MP3, WAV, M4A, AAC, OGG, WebM, or MP4 files.",
+        },
+        { status: 400 },
+      )
+    }
 
     let rawTranscription = ""
     let polishedNote = ""
@@ -26,7 +60,12 @@ export async function POST(request: NextRequest) {
     let medicalTopics: string[] = []
 
     if (service === "gemini") {
-      // Transcribe with Gemini (best for long audio)
+      // Convert file to base64 for Gemini
+      const bytes = await audioFile.arrayBuffer()
+      const base64Audio = Buffer.from(bytes).toString("base64")
+      const mimeType = audioFile.type || "audio/webm"
+
+      // Transcribe with Gemini
       const transcriptionResult = await transcribeWithGemini(base64Audio, mimeType, enableMultiSpeaker)
       if (!transcriptionResult.success) {
         return NextResponse.json({ success: false, error: transcriptionResult.error })
@@ -51,7 +90,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (service === "openai_whisper") {
       // Transcribe with OpenAI Whisper
-      const transcriptionResult = await transcribeWithOpenAI(base64Audio, mimeType, enableMultiSpeaker)
+      const transcriptionResult = await transcribeWithOpenAI(audioFile, enableMultiSpeaker)
       if (!transcriptionResult.success) {
         return NextResponse.json({ success: false, error: transcriptionResult.error })
       }
@@ -95,7 +134,16 @@ export async function POST(request: NextRequest) {
           medicalTopics = topicsResult.topics
         }
       }
+    } else {
+      return NextResponse.json({ success: false, error: "Invalid service specified" }, { status: 400 })
     }
+
+    console.log("Transcription completed successfully:", {
+      service,
+      rawLength: rawTranscription.length,
+      polishedLength: polishedNote.length,
+      topicsCount: medicalTopics.length,
+    })
 
     return NextResponse.json({
       success: true,
@@ -107,7 +155,13 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error("Transcription error:", error)
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
+      { status: 500 },
+    )
   }
 }
 
@@ -160,16 +214,20 @@ async function transcribeWithGemini(base64Audio: string, mimeType: string, enabl
   }
 }
 
-async function transcribeWithOpenAI(base64Audio: string, mimeType: string, enableMultiSpeaker: boolean) {
+async function transcribeWithOpenAI(audioFile: File, enableMultiSpeaker: boolean) {
   try {
-    // Convert base64 to blob for OpenAI API
-    const audioBuffer = Buffer.from(base64Audio, "base64")
-    const audioBlob = new Blob([audioBuffer], { type: mimeType })
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OpenAI API key not configured")
+    }
 
     const formData = new FormData()
-    formData.append("file", audioBlob, "audio.webm")
+    formData.append("file", audioFile, audioFile.name)
     formData.append("model", "whisper-1")
     formData.append("response_format", "text")
+
+    if (enableMultiSpeaker) {
+      formData.append("timestamp_granularities[]", "segment")
+    }
 
     const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
@@ -180,7 +238,8 @@ async function transcribeWithOpenAI(base64Audio: string, mimeType: string, enabl
     })
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`)
+      const errorText = await response.text()
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`)
     }
 
     const transcriptionText = await response.text()
