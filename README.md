@@ -66,28 +66,28 @@ Primary table for transcription data and metadata.
 
 \`\`\`sql
 CREATE TABLE recordings (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  raw_transcription TEXT,
-  polished_note TEXT,
-  multispeaker_output TEXT,
-  medical_topics JSONB DEFAULT '[]',
-  is_medical BOOLEAN DEFAULT FALSE,
-  audio_url TEXT,
-  service_used VARCHAR(50),
-  sentiment_analysis JSONB DEFAULT '{}',
-  speaker_diarization JSONB DEFAULT '{}',
-  topic_detection JSONB DEFAULT '{}',
-  vad_segments JSONB DEFAULT '[]',
-  audio_metadata JSONB DEFAULT '{}',
-  processing_status VARCHAR(50) DEFAULT 'completed',
-  confidence_score DECIMAL(3,2),
-  language_detected VARCHAR(10),
-  duration_seconds INTEGER,
-  file_size_bytes BIGINT,
-  audio_format VARCHAR(20),
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+id SERIAL PRIMARY KEY,
+title VARCHAR(255) NOT NULL,
+raw_transcription TEXT,
+polished_note TEXT,
+multispeaker_output TEXT,
+medical_topics JSONB DEFAULT '[]',
+is_medical BOOLEAN DEFAULT FALSE,
+audio_url TEXT,
+service_used VARCHAR(50),
+sentiment_analysis JSONB DEFAULT '{}',
+speaker_diarization JSONB DEFAULT '{}',
+topic_detection JSONB DEFAULT '{}',
+vad_segments JSONB DEFAULT '[]',
+audio_metadata JSONB DEFAULT '{}',
+processing_status VARCHAR(50) DEFAULT 'completed',
+confidence_score DECIMAL(3,2),
+language_detected VARCHAR(10),
+duration_seconds INTEGER,
+file_size_bytes BIGINT,
+audio_format VARCHAR(20),
+created_at TIMESTAMP DEFAULT NOW(),
+updated_at TIMESTAMP DEFAULT NOW()
 );
 \`\`\`
 
@@ -96,14 +96,14 @@ Speaker diarization results and voice characteristics.
 
 \`\`\`sql
 CREATE TABLE speakers (
-  id SERIAL PRIMARY KEY,
-  recording_id INTEGER REFERENCES recordings(id) ON DELETE CASCADE,
-  speaker_id VARCHAR(50) NOT NULL,
-  speaker_label VARCHAR(100),
-  total_duration DECIMAL(10,2),
-  segments_count INTEGER DEFAULT 0,
-  confidence_score DECIMAL(3,2),
-  voice_characteristics JSONB DEFAULT '{}'
+id SERIAL PRIMARY KEY,
+recording_id INTEGER REFERENCES recordings(id) ON DELETE CASCADE,
+speaker_id VARCHAR(50) NOT NULL,
+speaker_label VARCHAR(100),
+total_duration DECIMAL(10,2),
+segments_count INTEGER DEFAULT 0,
+confidence_score DECIMAL(3,2),
+voice_characteristics JSONB DEFAULT '{}'
 );
 \`\`\`
 
@@ -112,17 +112,17 @@ Detailed time-stamped analysis of audio segments.
 
 \`\`\`sql
 CREATE TABLE segments (
-  id SERIAL PRIMARY KEY,
-  recording_id INTEGER REFERENCES recordings(id) ON DELETE CASCADE,
-  speaker_id INTEGER REFERENCES speakers(id) ON DELETE CASCADE,
-  start_time DECIMAL(10,3) NOT NULL,
-  end_time DECIMAL(10,3) NOT NULL,
-  text TEXT NOT NULL,
-  confidence DECIMAL(3,2),
-  sentiment JSONB DEFAULT '{}',
-  topics JSONB DEFAULT '[]',
-  is_speech BOOLEAN DEFAULT TRUE,
-  word_count INTEGER DEFAULT 0
+id SERIAL PRIMARY KEY,
+recording_id INTEGER REFERENCES recordings(id) ON DELETE CASCADE,
+speaker_id INTEGER REFERENCES speakers(id) ON DELETE CASCADE,
+start_time DECIMAL(10,3) NOT NULL,
+end_time DECIMAL(10,3) NOT NULL,
+text TEXT NOT NULL,
+confidence DECIMAL(3,2),
+sentiment JSONB DEFAULT '{}',
+topics JSONB DEFAULT '[]',
+is_speech BOOLEAN DEFAULT TRUE,
+word_count INTEGER DEFAULT 0
 );
 \`\`\`
 
@@ -131,17 +131,17 @@ Comprehensive insights and summary data.
 
 \`\`\`sql
 CREATE TABLE analytics (
-  id SERIAL PRIMARY KEY,
-  recording_id INTEGER REFERENCES recordings(id) ON DELETE CASCADE,
-  total_speakers INTEGER DEFAULT 1,
-  speech_percentage DECIMAL(5,2),
-  silence_percentage DECIMAL(5,2),
-  average_sentiment DECIMAL(3,2),
-  dominant_emotion VARCHAR(50),
-  key_topics JSONB DEFAULT '[]',
-  summary TEXT,
-  insights JSONB DEFAULT '{}',
-  created_at TIMESTAMP DEFAULT NOW()
+id SERIAL PRIMARY KEY,
+recording_id INTEGER REFERENCES recordings(id) ON DELETE CASCADE,
+total_speakers INTEGER DEFAULT 1,
+speech_percentage DECIMAL(5,2),
+silence_percentage DECIMAL(5,2),
+average_sentiment DECIMAL(3,2),
+dominant_emotion VARCHAR(50),
+key_topics JSONB DEFAULT '[]',
+summary TEXT,
+insights JSONB DEFAULT '{}',
+created_at TIMESTAMP DEFAULT NOW()
 );
 \`\`\`
 
@@ -155,23 +155,23 @@ Process audio with advanced analysis capabilities.
 **Request:**
 \`\`\`typescript
 FormData {
-  audio: File,
-  service: 'gemini' | 'openai_whisper' | 'deepgram_nova',
-  enableMedical: boolean,
-  enableMultiSpeaker: boolean
+audio: File,
+service: 'gemini' | 'openai_whisper' | 'deepgram_nova',
+enableMedical: boolean,
+enableMultiSpeaker: boolean
 }
 \`\`\`
 
 **Response:**
 \`\`\`typescript
 {
-  success: boolean,
-  rawTranscription: string,
-  polishedNote: string,
-  multiSpeakerOutput: string,
-  medicalTopics: string[],
-  service: string,
-  error?: string
+success: boolean,
+rawTranscription: string,
+polishedNote: string,
+multiSpeakerOutput: string,
+medicalTopics: string[],
+service: string,
+error?: string
 }
 \`\`\`
 
@@ -187,9 +187,9 @@ Retrieve recordings with pagination and filtering.
 **Response:**
 \`\`\`typescript
 {
-  success: boolean,
-  recordings: Recording[],
-  error?: string
+success: boolean,
+recordings: Recording[],
+error?: string
 }
 \`\`\`
 
@@ -199,9 +199,9 @@ Get specific recording details.
 **Response:**
 \`\`\`typescript
 {
-  success: boolean,
-  recording: Recording,
-  error?: string
+success: boolean,
+recording: Recording,
+error?: string
 }
 \`\`\`
 
@@ -211,10 +211,10 @@ Update recording information.
 **Request:**
 \`\`\`typescript
 {
-  title?: string,
-  raw_transcription?: string,
-  polished_note?: string,
-  multispeaker_output?: string
+title?: string,
+raw_transcription?: string,
+polished_note?: string,
+multispeaker_output?: string
 }
 \`\`\`
 
@@ -229,19 +229,19 @@ Save audio file and transcription data.
 **Request:**
 \`\`\`typescript
 FormData {
-  audio: File,
-  transcriptionData: string // JSON stringified transcription data
+audio: File,
+transcriptionData: string // JSON stringified transcription data
 }
 \`\`\`
 
 **Response:**
 \`\`\`typescript
 {
-  success: boolean,
-  recordingId: number,
-  audioUrl: string,
-  title: string,
-  error?: string
+success: boolean,
+recordingId: number,
+audioUrl: string,
+title: string,
+error?: string
 }
 \`\`\`
 
@@ -255,8 +255,6 @@ FormData {
 
 ### Environment Variables
 
-Create a `.env.local` file with the following variables:
-
 \`\`\`env
 # Database
 DATABASE_URL=postgresql://[user]:[password]@[host]/[database]
@@ -267,14 +265,13 @@ POSTGRES_URL_NON_POOLING=postgresql://[user]:[password]@[host]/[database]
 # Storage
 BLOB_READ_WRITE_TOKEN=vercel_blob_token
 
-# AI Services
+# AI Services (Server-side only - NEVER expose these to the client)
 GEMINI_API_KEY=your_gemini_api_key
 OPENAI_API_KEY=your_openai_api_key
 DEEPGRAM_API_KEY=your_deepgram_api_key
-
-# Public Keys (for client-side usage)
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
 \`\`\`
+
+**🔒 CRITICAL SECURITY NOTE:** All API keys listed above (`GEMINI_API_KEY`, `OPENAI_API_KEY`, `DEEPGRAM_API_KEY`) are server-side secrets and **must never** be prefixed with `NEXT_PUBLIC_` or otherwise exposed in client-side code. The application uses secure server-side API routes and server actions for all communications with AI services.
 
 ### Database Setup
 
@@ -361,8 +358,8 @@ document.getElementById('topicMultiSpeaker').checked = true;
 
 // Process with advanced features
 await transcribeAudio(audioBlob, {
-  enableMedical: true,
-  enableMultiSpeaker: true
+enableMedical: true,
+enableMultiSpeaker: true
 });
 \`\`\`
 
@@ -441,7 +438,7 @@ npm run test:e2e
 \`\`\`javascript
 // Check browser permissions
 navigator.permissions.query({name: 'microphone'})
-  .then(result => console.log(result.state));
+.then(result => console.log(result.state));
 \`\`\`
 
 #### API Rate Limits
@@ -517,4 +514,3 @@ For support and questions:
 ---
 
 **Built with ❤️ by the Finla.ai team**
-\`\`\`

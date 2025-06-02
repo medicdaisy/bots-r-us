@@ -6,13 +6,13 @@ Status: COMPLETED
 - Added proper refs for DOM elements and persistent values
 - Converted event listeners to React event handlers
 - Preserved all original functionality including:
-  * Voice recording with MediaRecorder API
-  * Google Gemini AI integration
-  * Live waveform visualization
-  * Real-time timer
-  * Theme switching
-  * Tab navigation
-  * Responsive design
+* Voice recording with MediaRecorder API
+* Google Gemini AI integration
+* Live waveform visualization
+* Real-time timer
+* Theme switching
+* Tab navigation
+* Responsive design
 - Environment variable configured (GEMINI_API_KEY)
 [TASK END] - 2024-12-06 22:07:39
 
@@ -45,9 +45,9 @@ Status: COMPLETED
 - Created medical content analysis and highlighting
 - Added feature toggles in header for easy control
 - Enhanced server actions to support new features:
-  * transcribeAudio now supports multi-speaker mode
-  * polishNote enhanced for medical content formatting
-  * Added detectMedicalTopics function for content analysis
+* transcribeAudio now supports multi-speaker mode
+* polishNote enhanced for medical content formatting
+* Added detectMedicalTopics function for content analysis
 - Added medical topics banner with visual indicators
 - Maintained backward compatibility for general use
 - Enhanced UI with proper responsive design for new features
@@ -60,9 +60,9 @@ Status: COMPLETED
 - Corrected polishNote function API call structure  
 - Fixed detectMedicalTopics function API call structure
 - Updated to use proper GoogleGenAI SDK methods:
-  * genAI.getGenerativeModel() instead of genAI.models
-  * model.generateContent() with proper parameter structure
-  * result.response.text() for getting response text
+* genAI.getGenerativeModel() instead of genAI.models
+* model.generateContent() with proper parameter structure
+* result.response.text() for getting response text
 - Resolved JSON parsing error in transcribeAudio
 - All server actions now use correct Gemini API format
 [TASK END] - 2024-12-06 22:52:18
@@ -72,9 +72,9 @@ Task: Fix API Structure Based on Working Original Code
 Status: COMPLETED
 - Analyzed original working TypeScript implementation
 - Corrected API call structure to match working pattern:
-  * Using genAI.models.generateContent() directly (not getGenerativeModel)
-  * Using response.text (without parentheses)
-  * Proper contents array structure
+* Using genAI.models.generateContent() directly (not getGenerativeModel)
+* Using response.text (without parentheses)
+* Proper contents array structure
 - Reverted to working API pattern from original codebase
 - Maintained all new features while fixing core API calls
 - Should resolve JSON parsing and API errors
@@ -88,9 +88,9 @@ Status: COMPLETED
 - Fixed initialization: new GoogleGenerativeAI(apiKey) 
 - Updated model name to "gemini-1.5-flash" (stable model)
 - Corrected API call pattern:
-  * genAI.getGenerativeModel({ model })
-  * model.generateContent() with proper parameters
-  * response.text() method call
+* genAI.getGenerativeModel({ model })
+* model.generateContent() with proper parameters
+* response.text() method call
 - Added better error handling for API authentication issues
 - Should resolve "Request En..." JSON parsing error
 [TASK END] - 2024-12-06 23:08:22
@@ -110,17 +110,17 @@ Status: COMPLETED
 - Replaced React-based Dictate app with HTML/CSS/JS Finla.ai interface
 - Fixed JavaScript syntax errors that were causing "Unexpected token '}'" error
 - Implemented multiple transcription services:
-  * Google Gemini (optimized for long audio timeframes)
-  * OpenAI Whisper (industry standard)
-  * Deepgram Nova-3 (real-time capable)
+* Google Gemini (optimized for long audio timeframes)
+* OpenAI Whisper (industry standard)
+* Deepgram Nova-3 (real-time capable)
 - Added environment variables: OPENAI_API_KEY, DEEPGRAM_API_KEY
 - Enhanced features:
-  * Real-time audio waveform visualization
-  * Multi-speaker detection across all services
-  * Medical topic detection and analysis
-  * Polished note generation using Gemini
-  * Recording history with Neon database storage
-  * Responsive design for desktop and mobile
+* Real-time audio waveform visualization
+* Multi-speaker detection across all services
+* Medical topic detection and analysis
+* Polished note generation using Gemini
+* Recording history with Neon database storage
+* Responsive design for desktop and mobile
 - Updated API routes to handle multiple transcription services
 - Maintained existing database schema and Blob storage integration
 - Fixed all JavaScript syntax issues and event handling
@@ -142,3 +142,24 @@ Status: COMPLETED
 - Created test endpoint for upload verification
 - Enhanced user feedback with file size display and error details
 [TASK END] - 2024-12-06 23:45:30
+
+[TASK START] - 2025-06-03 05:52:09
+Task: Fix Security Issue - Remove NEXT_PUBLIC_GEMINI_API_KEY from README.md
+Status: COMPLETED
+- Removed `NEXT_PUBLIC_GEMINI_API_KEY` reference from `README.md` environment variable list.
+- Updated security note in `README.md` to emphasize that all AI service API keys are server-side only and must not be prefixed with `NEXT_PUBLIC_`.
+- Confirmed application code uses `process.env.GEMINI_API_KEY` (server-side) for Gemini API calls.
+- Resolved Vercel deployment error related to exposed sensitive environment variable.
+[TASK END] - 2025-06-03 05:52:09
+
+[TASK START] - 2025-06-03 05:56:47
+Task: Implement Live Transcription Pipeline
+Status: IN PROGRESS
+- Implementing new architecture for live, chunk-based transcription.
+- Creating new front-end (public/transcribe.html) for live interaction.
+- Developing API routes for chunk streaming (/api/stream-chunk), heartbeat (/api/heartbeat), and finalization (/api/finalize-diarization).
+- Adding STT helper libraries for Whisper, Deepgram, and Gemini to support chunked processing.
+- Implementing database helpers for storing partial and full transcripts (`lib/db.ts` created).
+- Defined SQL for new `partial_transcripts` and `full_transcripts` tables (executed successfully).
+- Adapting paths and code for Next.js App Router and TypeScript.
+[TASK END] - 2025-06-03 05:59:12
