@@ -84,18 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(`Status: ${message} (${type})`)
   }
 
-  // Add a function to show detailed error information
-  function showErrorDetails(error) {
-    const errorDetails = document.getElementById("errorDetails")
-    if (errorDetails) {
-      errorDetails.style.display = "block"
-      errorDetails.textContent = `Debug: ${error}`
-      setTimeout(() => {
-        errorDetails.style.display = "none"
-      }, 10000) // Hide after 10 seconds
-    }
-  }
-
   // UI state management
   function updateUIForRecordingState() {
     startRecordBtn.disabled = recordingState !== "idle"
@@ -258,18 +246,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // API calls
-  async function transcribeAudio(audioData, options = {}) {
+  async function transcribeAudio(audioBlob, options = {}) {
     const formData = new FormData()
-
-    // Handle both File and Blob objects
-    if (audioData instanceof File) {
-      formData.append("audio", audioData, audioData.name)
-    } else if (audioData instanceof Blob) {
-      formData.append("audio", audioData, "recording.webm")
-    } else {
-      throw new Error("Invalid audio data type")
-    }
-
+    formData.append("audio", audioBlob)
     formData.append("service", sttServiceSelect.value)
     formData.append("enableMedical", topicMedicalCheckbox.checked)
     formData.append("enableMultiSpeaker", topicMultiSpeakerCheckbox.checked)
@@ -280,17 +259,10 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Transcription failed: ${response.status} ${response.statusText} - ${errorText}`)
+      throw new Error(`Transcription failed: ${response.statusText}`)
     }
 
-    try {
-      return await response.json()
-    } catch (error) {
-      console.error("Transcription API error:", error)
-      showErrorDetails(error.message)
-      throw new Error(`Transcription failed: ${error.message}`)
-    }
+    return await response.json()
   }
 
   async function saveRecording(audioBlob, transcriptionData) {
@@ -311,36 +283,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Handle file upload
-  const handleFileUpload = async (event) => {
+  const handleFileUpload = (event) => {
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith("audio/") && !file.type.startsWith("video/")) {
-      updateStatus("Please select an audio or video file", "error")
+    if (!file.type.startsWith("audio/")) {
+      updateStatus("Please select an audio file", "error")
       return
     }
 
-    // Check file size (max 50MB)
-    const maxSize = 50 * 1024 * 1024 // 50MB
-    if (file.size > maxSize) {
-      updateStatus("File too large. Maximum size is 50MB.", "error")
-      return
-    }
+    updateStatus("Processing uploaded audio...", "info")
 
-    fileNameDisplay.textContent = `Selected: ${file.name}`
-    clearOutputFields()
-    updateStatus(`Processing "${file.name}"...`, "info")
-    showLoading("Processing file...")
-    uploadAudioBtn.textContent = "Processing..."
-    uploadAudioBtn.classList.add("animating")
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        const base64data = e.target?.result
+        const base64Audio = base64data.split(",")[1]
+        const mimeType = file.type
 
-    try {
-      await processAudio(file)
-    } catch (error) {
-      console.error("Error processing uploaded file:", error)
-      updateStatus("Error processing uploaded file: " + error.message, "error")
-      resetToIdle()
+        await processAudio(file)
+      } catch (error) {
+        console.error("Error processing uploaded file:", error)
+        updateStatus("Error processing uploaded file", "error")
+      }
     }
+    reader.readAsDataURL(file)
   }
 
   // Start recording
@@ -467,19 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Process audio
-  const processAudio = async (audioData) => {
-    let audioBlob
-
-    // Handle both File objects and Blob objects
-    if (audioData instanceof File) {
-      audioBlob = audioData
-    } else if (audioData instanceof Blob) {
-      audioBlob = audioData
-    } else {
-      updateStatus("Invalid audio data provided", "error")
-      return
-    }
-
+  const processAudio = async (audioBlob) => {
     if (audioBlob.size === 0) {
       updateStatus("No audio data captured. Please try again.", "error")
       return
@@ -572,27 +527,14 @@ document.addEventListener("DOMContentLoaded", () => {
   audioFileUpload.addEventListener("change", async (event) => {
     const file = event.target.files[0]
     if (file) {
-      console.log("File selected:", {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        lastModified: file.lastModified,
-      })
-
-      fileNameDisplay.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+      fileNameDisplay.textContent = `Selected: ${file.name}`
       clearOutputFields()
       updateStatus(`Processing "${file.name}"...`, "info")
       showLoading("Processing file...")
       uploadAudioBtn.textContent = "Processing..."
       uploadAudioBtn.classList.add("animating")
 
-      try {
-        await processAudio(file)
-      } catch (error) {
-        console.error("File processing error:", error)
-        updateStatus(`Error processing file: ${error.message}`, "error")
-        resetToIdle()
-      }
+      await processAudio(file)
     } else {
       fileNameDisplay.textContent = "No file selected."
       uploadAudioBtn.textContent = "Upload Audio File"
@@ -739,4 +681,32 @@ document.addEventListener("DOMContentLoaded", () => {
       copyToClipboard(textToCopy, button)
     }
   })
+
+  // Create animated background particles
+  function createParticles() {
+    const animatedBg = document.getElementById("animatedBg")
+    const particleCount = 50
+
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement("div")
+      particle.className = "particle"
+
+      // Random size between 2px and 12px
+      const size = Math.random() * 10 + 2
+      particle.style.width = size + "px"
+      particle.style.height = size + "px"
+
+      // Random position
+      particle.style.left = Math.random() * 100 + "%"
+      particle.style.top = Math.random() * 100 + "%"
+
+      // Random animation delay
+      particle.style.animationDelay = Math.random() * 6 + "s"
+
+      animatedBg.appendChild(particle)
+    }
+  }
+
+  // Initialize particles
+  createParticles()
 })

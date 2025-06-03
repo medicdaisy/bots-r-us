@@ -174,4 +174,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize
   loadRecordings()
+
+  // Create animated background particles
+  function createParticles() {
+    const animatedBg = document.getElementById("animatedBg")
+    const particleCount = 50
+
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement("div")
+      particle.className = "particle"
+
+      const size = Math.random() * 10 + 2
+      particle.style.width = size + "px"
+      particle.style.height = size + "px"
+
+      particle.style.left = Math.random() * 100 + "%"
+      particle.style.top = Math.random() * 100 + "%"
+
+      particle.style.animationDelay = Math.random() * 6 + "s"
+
+      animatedBg.appendChild(particle)
+    }
+  }
+
+  createParticles()
 })

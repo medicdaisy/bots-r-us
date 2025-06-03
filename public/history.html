@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dictate - Recording History</title>
+    <title>Bots-R-Here - Recording History</title>
     <link rel="stylesheet" href="/css/transcribe.css">
     <style>
         .history-container {
@@ -183,11 +183,56 @@
             border-color: var(--accent-primary);
             box-shadow: 0 0 0 2px var(--accent-primary);
         }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB);
+            background-size: 400% 400%;
+            z-index: -1;
+            animation: animateBackground 15s ease infinite;
+        }
+
+        @keyframes animateBackground {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-image {
+            width: 50px; /* Adjust as needed */
+            height: auto;
+            margin-right: 10px; /* Space between image and text */
+        }
+
+        .logo-text {
+            font-size: 1.5rem; /* Adjust as needed */
+            font-weight: bold;
+            color: var(--text-primary); /* Or any other color */
+        }
     </style>
 </head>
 <body>
+    <div class="animated-bg" id="animatedBg"></div>
     <header class="app-header">
-        <div class="logo-text">Dictate</div>
+        <div class="logo-container">
+         <img src="https://i0.wp.com/bots-r-here.com/wp-content/uploads/2024/12/Ontwerp-zonder-titel.png?w=512&ssl=1" alt="Bots-R-Here" class="logo-image">
+         <span class="logo-text">Bots-R-Here</span>
+       </div>
         <div class="theme-switch-wrapper">
             <label for="themeToggleCheckbox" style="color: var(--text-secondary); font-size: 0.8rem; margin-right: 0.5rem;">Dark Mode</label>
             <label class="theme-switch" for="themeToggleCheckbox">

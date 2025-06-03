@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finla.ai - Advanced Transcription UI</title>
+    <title>Bots-R-Here - Advanced Transcription UI</title>
     <style>
         /* CSS Variables for Theming and Consistency */
         :root {
@@ -44,6 +44,119 @@
             --border-radius: 8px;
             --transition-speed: 0.25s;
             --button-padding: 0.75em 1.4em;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%);
+            z-index: -2;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(odd) {
+            animation-direction: reverse;
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(3n) {
+            animation-duration: 10s;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .particle:nth-child(4n) {
+            animation-duration: 12s;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) translateX(0px);
+                opacity: 0.6;
+            }
+            25% {
+                transform: translateY(-20px) translateX(10px);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-10px) translateX(-15px);
+                opacity: 0.8;
+            }
+            75% {
+                transform: translateY(-30px) translateX(5px);
+                opacity: 0.9;
+            }
+        }
+
+        /* Logo Styling */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-image {
+            height: 32px;
+            width: auto;
+            filter: brightness(1.1);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .footer-link {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-speed);
+        }
+
+        .footer-link:hover {
+            color: var(--accent-secondary);
+            text-decoration: underline;
+        }
+
+        /* Adjust main content background for particles */
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-theme .card {
+            background-color: rgba(31, 36, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(55, 65, 81, 0.3);
         }
 
         /* Initialize theme variables */
@@ -92,7 +205,23 @@
             border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;
             transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
         }
-        .logo-text { font-size: 1.5rem; font-weight: 700; color: var(--accent-primary); }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-image {
+            height: 32px;
+            width: auto;
+            filter: brightness(1.1);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
         .theme-switch-wrapper { display: flex; align-items: center; }
         .theme-switch { display: inline-block; height: 26px; position: relative; width: 50px; margin-left: 0.5rem; }
         .theme-switch input { display:none; }
@@ -312,13 +441,17 @@
     </style>
 </head>
 <body>
+    <div class="animated-bg" id="animatedBg"></div>
     <div id="loadingOverlay">
         <div class="spinner"></div>
         <p id="loadingMessage">Processing audio...</p>
     </div>
 
     <header class="app-header">
-        <div class="logo-text">Finla.ai</div>
+        <div class="logo-container">
+         <img src="https://i0.wp.com/bots-r-here.com/wp-content/uploads/2024/12/Ontwerp-zonder-titel.png?w=512&ssl=1" alt="Bots-R-Here" class="logo-image">
+         <span class="logo-text">Bots-R-Here</span>
+       </div>
         <div class="theme-switch-wrapper">
             <label for="themeToggleCheckbox" style="color: var(--text-secondary); font-size: 0.8rem; margin-right: 0.5rem;">Dark Mode</label>
             <label class="theme-switch" for="themeToggleCheckbox">
@@ -350,7 +483,7 @@
                         <button id="stopRecordBtn" class="btn btn-secondary disabled" disabled>Stop & Transcribe</button>
                         <div class="upload-group">
                             <button id="uploadAudioBtn" class="btn btn-upload">Upload Audio File</button>
-                            <input type="file" id="audioFileUpload" accept="audio/*,video/webm,video/mp4,audio/webm,audio/mp3,audio/mp4,audio/mpeg,audio/mpga,audio/m4a,audio/wav,audio/ogg,audio/aac,.mp3,.wav,.m4a,.aac,.ogg,.webm,.mp4">
+                            <input type="file" id="audioFileUpload" accept="audio/*,video/webm,audio/webm,audio/mp3,audio/mp4,audio/mpeg,audio/mpga,audio/m4a,audio/wav,audio/ogg">
                             <div id="fileNameDisplay">No file selected.</div>
                         </div>
                     </div>
@@ -379,8 +512,6 @@
                         <div id="statusDisplayText" class="status-display-text">Idle. Ready to record or upload.</div>
                     </div>
                     <canvas id="audioWaveformCanvas"></canvas>
-                    <div id="errorDetails" style="display: none; margin-top: 0.5rem; padding: 0.5rem; background-color: var(--error-color); color: white; border-radius: 4px; font-size: 0.875rem;">
-                    </div>
                 </section>
             </div>
 
@@ -444,7 +575,7 @@
     </div>
 
     <footer class="app-footer">
-        <p>© <span id="currentYear"></span> Finla.ai. Advanced transcription interface.</p>
+        <p>© <span id="currentYear"></span> <a href="https://bots-r-here.com/" target="_blank" class="footer-link">Bots-R-Here</a>. Advanced transcription interface.</p>
     </footer>
 
     <script src="/js/transcribe.js"></script>
